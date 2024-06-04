@@ -1,0 +1,20 @@
+schemaVersion: 2.2.2
+metadata:
+  name: helloserver-testst-4
+components:
+  - name: tools
+    container:
+      image: >-
+        registry.redhat.io/devspaces/udi-rhel8@sha256:720d4bff5924ac76af5b25606ebfb2bcf853212af6c8202f591c4954a88f57f6
+      memoryLimit: 3Gi
+
+commands:
+  - id: run-application
+    exec:
+      label: "Run server.go"
+      component: tools
+      workingDir: '${PROJECT_SOURCE}'
+      commandLine: "go run server.go"
+      group:
+        kind: run
+        isDefault: true

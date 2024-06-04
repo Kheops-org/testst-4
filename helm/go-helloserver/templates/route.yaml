@@ -1,0 +1,17 @@
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "testst-4.fullname" . }}
+  labels:
+    {{- with .Values.backstageLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  host: {{ .Values.route.host }}
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: {{ include "testst-4.fullname" . }}
+

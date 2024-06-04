@@ -1,0 +1,60 @@
+
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Generate Time-Based Tag
+      id: generate-tag
+      run: |
+        TAG=$(date +"%Y%m%d-%H%M%S")
+        echo "::set-output name=tag::$TAG"
+          
+    - name: Login to Docker Registry
+      uses: docker/login-action@v2
+      with:
+        registry: registry.nationtech.io
+        username: ${{ secrets.NATIONTECH_REGISTRY_USER }}
+        password: ${{ secrets.NATIONTECH_REGISTRY_PASSWORD }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        push: true
+        tags: registry.nationtech.io/testst-4:${{ steps.generate-tag.outputs.tag }}
+    
+    - name: Update Helm Chart Values
+      run: |
+        sed -i "s/tag: .*/tag: ${{ steps.generate-tag.outputs.tag }}/" ./helm/go-helloserver/values.yaml
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git diff
+        git add ./helm/go-helloserver/values.yaml
+        git commit -m "Upgraded deployment to ${{ steps.generate-tag.outputs.tag }}"
+
+    - name: Update Production Helm Chart Values
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      run: |
+        sed -i "s/tag: .*/tag: ${{ github.ref_name }}/" ./helm/go-helloserver/values-production.yaml
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git diff
+        git add ./helm/go-helloserver/values.yaml
+        git commit -m "Upgraded production deployment to ${{ github.ref_name }}"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}

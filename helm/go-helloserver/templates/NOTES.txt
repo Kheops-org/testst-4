@@ -1,0 +1,1 @@
+1. Access your application here : https://{{ .Values.route.host }}
