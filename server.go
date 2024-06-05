@@ -2,20 +2,21 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/hyperdxio/opentelemetry-go/otelzap"
+	"github.com/hyperdxio/opentelemetry-logs-go/exporters/otlp/otlplogs"
+	sdk "github.com/hyperdxio/opentelemetry-logs-go/sdk/logs"
+	"github.com/hyperdxio/otel-config-go/otelconfig"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
 	"io"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/hyperdxio/opentelemetry-go/otelzap"
-	"github.com/hyperdxio/opentelemetry-logs-go/exporters/otlp/otlplogs"
-	"github.com/hyperdxio/otel-config-go/otelconfig"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
-	sdk "github.com/hyperdxio/opentelemetry-logs-go/sdk/logs"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
-	"go.opentelemetry.io/otel/sdk/resource"
+	"time"
 )
 
 // configure common attributes for all logs
@@ -44,7 +45,7 @@ func WithTraceMetadata(ctx context.Context, logger *zap.Logger) *zap.Logger {
 
 func main() {
 	// Initialize otel config and use it across the entire app
-  println("Service starting up")
+	println("Service starting up")
 
 	otelShutdown, err := otelconfig.ConfigureOpenTelemetry()
 	if err != nil {
@@ -67,6 +68,29 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	logger.Warn("hello world", zap.String("foo", "bar"))
 
+	// Define the interval
+	interval := time.Second * 5
+
+	// Create a new ticker that ticks every interval
+	ticker := time.NewTicker(interval)
+	// Ensure the ticker is stopped when we're done
+	defer ticker.Stop()
+
+	// Use a channel to signal when to stop
+	done := make(chan bool)
+
+	// Start a goroutine to run the function every interval
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case t := <-ticker.C:
+				callYourFunction(t)
+			}
+		}
+	}()
+
 	http.Handle("/", otelhttp.NewHandler(wrapHandler(logger, ExampleHandler), "example-service"))
 
 	port := os.Getenv("PORT")
@@ -79,6 +103,7 @@ func main() {
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		logger.Fatal(err.Error())
 	}
+
 }
 
 // Use this to wrap all handlers to add trace metadata to the logger
@@ -94,4 +119,8 @@ func wrapHandler(logger *zap.Logger, handler http.HandlerFunc) http.HandlerFunc 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	io.WriteString(w, `{"status":"ok"}`)
+}
+
+func callYourFunction(t time.Time) {
+	fmt.Printf("Function called at %v\n", t)
 }
