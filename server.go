@@ -19,6 +19,9 @@ import (
 	"time"
 )
 
+var globalSlice []byte
+var nbObjects int = 0
+
 // configure common attributes for all logs
 func newResource() *resource.Resource {
 	hostName, _ := os.Hostname()
@@ -69,7 +72,7 @@ func main() {
 	logger.Warn("hello world", zap.String("foo", "bar"))
 
 	// Define the interval
-	interval := time.Second * 5
+	interval := time.Second * 10
 
 	// Create a new ticker that ticks every interval
 	ticker := time.NewTicker(interval)
@@ -122,5 +125,13 @@ func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func callYourFunction(t time.Time) {
-	fmt.Printf("Function called at %v\n", t)
+	fmt.Printf("%v: Allocated objects: %d\n", t, nbObjects)
+	if nbObjects < 5 {
+		fmt.Printf("%v: Allocating new object\n", t)
+		data := make([]byte, 1024*1024*5) // 1 MB * 5
+		globalSlice = append(globalSlice, data...)
+		nbObjects++
+	} else {
+		fmt.Printf("%v: Objects limit reached, no new allocation\n", t)
+	}
 }
