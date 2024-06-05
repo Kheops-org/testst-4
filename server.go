@@ -126,9 +126,9 @@ func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 
 func callYourFunction(t time.Time) {
 	fmt.Printf("%v: Allocated objects: %d\n", t, nbObjects)
-	if nbObjects < 10 {
+	if nbObjects < 50 {
 		fmt.Printf("%v: Allocating new object\n", t)
-		data := make([]byte, 1024*1024*5) // 1 MB * 5
+		data := make([]byte, 1024*1024) // 1 MB
 		globalSlice = append(globalSlice, data...)
 		nbObjects++
 	} else {
