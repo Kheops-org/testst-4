@@ -72,7 +72,7 @@ func main() {
 	logger.Warn("hello world", zap.String("foo", "bar"))
 
 	// Define the interval
-	interval := time.Second * 10
+	interval := time.Second * 20
 
 	// Create a new ticker that ticks every interval
 	ticker := time.NewTicker(interval)
@@ -128,7 +128,7 @@ func callYourFunction(t time.Time) {
 	fmt.Printf("%v: Allocated objects: %d\n", t, nbObjects)
 	if nbObjects < 50 {
 		fmt.Printf("%v: Allocating new object\n", t)
-		data := make([]byte, 1024*1024) // 1 MB
+		data := make([]byte, 1024*1024*3) // 1 MB
 		globalSlice = append(globalSlice, data...)
 		nbObjects++
 	} else {
