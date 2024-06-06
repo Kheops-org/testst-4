@@ -129,7 +129,7 @@ func recurrentFunction(t time.Time) {
 	formattedTime := t.Format("2006-01-02 15:04:05")
 	fmt.Printf("%v: Allocated objects: %d\n", formattedTime, nbObjects)
 	if nbObjects < desiredNbObjects {
-		fmt.Printf("%v: Allocating new object\n", t)
+		fmt.Printf("%v: Allocating new object\n", formattedTime)
 		data := make([]byte, 1024*1024*objectsSizeInMB)
 		globalSlice = append(globalSlice, data...)
 		nbObjects++
