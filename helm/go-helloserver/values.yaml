@@ -9,7 +9,7 @@ image:
   repository: registry.nationtech.io/testst-4
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 20240606-120621
+  tag: 20240606-121030
 
 imagePullSecrets:
 - name: nationtech-registry-key
