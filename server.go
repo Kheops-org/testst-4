@@ -3,6 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/hyperdxio/opentelemetry-go/otelzap"
 	"github.com/hyperdxio/opentelemetry-logs-go/exporters/otlp/otlplogs"
 	sdk "github.com/hyperdxio/opentelemetry-logs-go/sdk/logs"
@@ -12,11 +18,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"time"
 )
 
 var desiredNbObjects = 50
@@ -120,7 +121,7 @@ func wrapHandler(logger *zap.Logger, handler http.HandlerFunc) http.HandlerFunc 
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	output := fmt.Sprintf(`{\n  "status":"ok",\n  "nbInstances":"%d",\n  "intervalInSecs":"%d"\n}`, nbObjects)
+	output := fmt.Sprintf(`{"status":"ok","nbInstances":"%d","intervalInSecs":"%d"}`, nbObjects, intervalInSecs)
 	io.WriteString(w, output)
 }
 
