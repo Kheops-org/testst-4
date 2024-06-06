@@ -75,7 +75,7 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	logger.Warn("hello world", zap.String("foo", "bar"))
 
-	interval := time.Second * intervalInSecs
+	interval := time.Second * time.Duration(intervalInSecs)
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
