@@ -5,7 +5,7 @@ components:
   - name: tools
     container:
       image: >-
-        registry.redhat.io/devspaces/udi-rhel8@sha256:720d4bff5924ac76af5b25606ebfb2bcf853212af6c8202f591c4954a88f57f6
+        registry.redhat.io/devspaces/udi-rhel8@sha256:00f8ba6ebf42f7a2309eaa618682156280cffa0b1533e08509dd88d5cff3f5b7
       memoryLimit: 3Gi
 
 commands:
