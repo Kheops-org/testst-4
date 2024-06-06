@@ -21,6 +21,8 @@ import (
 
 var globalSlice []byte
 var nbObjects int = 0
+var desiredNbObjects = 50
+var objectsSizeInMB = 1
 
 // configure common attributes for all logs
 func newResource() *resource.Resource {
@@ -71,12 +73,8 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	logger.Warn("hello world", zap.String("foo", "bar"))
 
-	// Define the interval
 	interval := time.Second * 20
-
-	// Create a new ticker that ticks every interval
 	ticker := time.NewTicker(interval)
-	// Ensure the ticker is stopped when we're done
 	defer ticker.Stop()
 
 	// Use a channel to signal when to stop
@@ -89,7 +87,7 @@ func main() {
 			case <-done:
 				return
 			case t := <-ticker.C:
-				callYourFunction(t)
+				recurrentFunction(t)
 			}
 		}
 	}()
@@ -106,7 +104,6 @@ func main() {
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		logger.Fatal(err.Error())
 	}
-
 }
 
 // Use this to wrap all handlers to add trace metadata to the logger
@@ -121,14 +118,15 @@ func wrapHandler(logger *zap.Logger, handler http.HandlerFunc) http.HandlerFunc 
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	io.WriteString(w, `{"status":"ok"}`)
+	output := fmt.Sprintf(`{"status":"ok","nbInstances":"%d"}`, nbObjects)
+	io.WriteString(w, output)
 }
 
-func callYourFunction(t time.Time) {
+func recurrentFunction(t time.Time) {
 	fmt.Printf("%v: Allocated objects: %d\n", t, nbObjects)
-	if nbObjects < 50 {
+	if nbObjects < desiredNbObjects {
 		fmt.Printf("%v: Allocating new object\n", t)
-		data := make([]byte, 1024*1024*3) // 1 MB
+		data := make([]byte, 1024*1024*objectsSizeInMB)
 		globalSlice = append(globalSlice, data...)
 		nbObjects++
 	} else {
