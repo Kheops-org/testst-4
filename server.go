@@ -19,10 +19,12 @@ import (
 	"time"
 )
 
-var globalSlice []byte
-var nbObjects int = 0
 var desiredNbObjects = 50
 var objectsSizeInMB = 1
+var intervalInSecs = 15
+
+var globalSlice []byte
+var nbObjects int = 0
 
 // configure common attributes for all logs
 func newResource() *resource.Resource {
@@ -73,7 +75,7 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	logger.Warn("hello world", zap.String("foo", "bar"))
 
-	interval := time.Second * 20
+	interval := time.Second * intervalInSecs
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
@@ -118,7 +120,7 @@ func wrapHandler(logger *zap.Logger, handler http.HandlerFunc) http.HandlerFunc 
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	output := fmt.Sprintf(`{"status":"ok","nbInstances":"%d"}`, nbObjects)
+	output := fmt.Sprintf(`{\n  "status":"ok",\n  "nbInstances":"%d",\n  "intervalInSecs":"%d"\n}`, nbObjects)
 	io.WriteString(w, output)
 }
 
@@ -130,6 +132,6 @@ func recurrentFunction(t time.Time) {
 		globalSlice = append(globalSlice, data...)
 		nbObjects++
 	} else {
-		fmt.Printf("%v: Objects limit reached, no new allocation\n", t)
+		fmt.Printf("%v: Objects limit reached (%d), no new allocation\n", t, desiredNbObjects)
 	}
 }
