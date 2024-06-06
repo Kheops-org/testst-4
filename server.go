@@ -126,13 +126,14 @@ func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func recurrentFunction(t time.Time) {
-	fmt.Printf("%v: Allocated objects: %d\n", t, nbObjects)
+	formattedTime := t.Format("2006-01-02 15:04:05")
+	fmt.Printf("%v: Allocated objects: %d\n", formattedTime, nbObjects)
 	if nbObjects < desiredNbObjects {
 		fmt.Printf("%v: Allocating new object\n", t)
 		data := make([]byte, 1024*1024*objectsSizeInMB)
 		globalSlice = append(globalSlice, data...)
 		nbObjects++
 	} else {
-		fmt.Printf("%v: Objects limit reached (%d), no new allocation\n", t, desiredNbObjects)
+		fmt.Printf("%v: Objects limit reached (%d), no new allocation\n", formattedTime, desiredNbObjects)
 	}
 }
